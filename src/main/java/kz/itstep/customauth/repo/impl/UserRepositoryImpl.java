@@ -25,9 +25,33 @@ public class UserRepositoryImpl implements UserRepository {
         return Optional.ofNullable(getByLoginAndPassword(login, password)
                 .orElseThrow(() -> new UserException("Login or password is empty")));
     }
+
+    @Override
+    public Optional<User> findUserByLogin(String login) throws UserException {
+        if (login.isEmpty()) {
+            throw new UserException("Login is empty");
+        }
+
+        return Optional.ofNullable(getByLogin(login)
+                .orElseThrow(() -> new UserException("Login is empty")));
+    }
+
+    @Override
+    public void saveUser(User user) throws UserException {
+        if(UserData.users.stream().anyMatch(s -> s.getId().equals(user.getId()) )){
+            throw new UserException("Student is already exists");
+        }
+        UserData.users.add(user);
+    }
+
     private Optional<User> getByLoginAndPassword(String login, String password) {
         return UserData.users.stream()
                 .filter(l->l.getLogin().equals(login) && l.getPassword().equals(password)).findFirst();
+    }
+
+    private Optional<User> getByLogin(String login) {
+        return UserData.users.stream()
+                .filter(l->l.getLogin().equals(login)).findFirst();
     }
 
     @Override

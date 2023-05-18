@@ -1,5 +1,6 @@
 package kz.itstep.customauth.controller;
 
+import kz.itstep.customauth.exception.UserException;
 import kz.itstep.customauth.service.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,13 +22,14 @@ public class InfoController {
     }
 
     @GetMapping
-    public ResponseEntity<String> getInfo(@RequestHeader(value = "Authorization", required = false) String token){
+    public ResponseEntity<String> getInfo(@RequestHeader(value = "Authorization", required = false) String token)
+            throws UserException {
+
         if(token!=null && authorizationService.isValid(token)){
             return ResponseEntity.ok("This is protected info for authorized users");
         }
         else {
             return new ResponseEntity<>("You are not allow to do this", HttpStatus.FORBIDDEN);
         }
-
     }
 }

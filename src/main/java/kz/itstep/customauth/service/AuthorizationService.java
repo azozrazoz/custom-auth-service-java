@@ -1,16 +1,22 @@
 package kz.itstep.customauth.service;
 
+import kz.itstep.customauth.exception.UserException;
+import kz.itstep.customauth.repo.impl.UserRepositoryImpl;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthorizationService {
-    private final Integer SHIFT = 6;
-    public String generateToken(String login){
+    private static final Integer SHIFT = 6;
+    private final UserRepositoryImpl userRepository;
 
-        return null;
+    public AuthorizationService(UserRepositoryImpl userRepository) {
+        this.userRepository = userRepository;
     }
-    public boolean isValid(String token) {
-        return true;
+    public String generateToken(String login){
+        return shepherLogin(login);
+    }
+    public boolean isValid(String token) throws UserException {
+        return userRepository.findUserByLogin(deshepherLogin(token)).isPresent();
     }
     private String shepherLogin(String login){
         StringBuilder encryptedLogin = new StringBuilder();
@@ -31,5 +37,23 @@ public class AuthorizationService {
         }
 
         return encryptedLogin.toString();
+    }
+    public static String deshepherLogin(String encryptedLogin) {
+        StringBuilder decryptedLogin = new StringBuilder();
+
+        for (int i = 0; i < encryptedLogin.length(); i++) {
+            char currentChar = encryptedLogin.charAt(i);
+
+            if (Character.isLetter(currentChar)) {
+                char baseChar = Character.isLowerCase(currentChar) ? 'a' : 'A';
+                char decryptedChar = (char) (((currentChar - baseChar - SHIFT + 26) % 26) + baseChar);
+                decryptedLogin.append(decryptedChar);
+            }
+            else {
+                decryptedLogin.append(currentChar);
+            }
+        }
+
+        return decryptedLogin.toString();
     }
 }
